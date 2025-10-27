@@ -1,6 +1,7 @@
 # Resonate Player Go
 
 A simple Go web application that receives Resonate audio streams and displays real-time metadata on a web interface.
+<img width="748" height="715" alt="Screenshot 2025-10-26 at 10 39 05 PM" src="https://github.com/user-attachments/assets/b5a08bf4-46c4-4071-9aab-b78ab957163e" />
 
 ## Features
 
