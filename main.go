@@ -197,7 +197,9 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		metadataMutex.RUnlock()
 
 		message, _ := json.Marshal(update)
-		conn.WriteMessage(websocket.TextMessage, message)
+		if err := conn.WriteMessage(websocket.TextMessage, message); err != nil {
+			log.Printf("Error sending initial metadata to client: %v", err)
+		}
 	} else {
 		metadataMutex.RUnlock()
 	}
@@ -249,7 +251,9 @@ func handleMetadataAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		log.Printf("Error encoding metadata response: %v", err)
+	}
 }
 
 // handleIndex serves the main HTML page
