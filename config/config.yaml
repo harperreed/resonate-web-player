@@ -1,0 +1,20 @@
+# Resonate Player Configuration
+
+# Resonate server settings
+server:
+  # Address of the Resonate server to connect to
+  address: "192.168.200.8:8927"
+  # Name of this player (displayed in server)
+  player_name: "Resonate Web Player"
+
+# Audio settings
+audio:
+  # Volume level (0-100)
+  volume: 80
+
+# Web server settings
+web:
+  # Port for the web interface
+  port: 8080
+  # Host to bind to (0.0.0.0 for all interfaces, localhost for local only)
+  host: "0.0.0.0"

@@ -1,0 +1,29 @@
+# Ignore build artifacts (except resonate-player binary for simple Dockerfile)
+# resonate-player
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Ignore test files
+*_test.go
+
+# Ignore git
+.git
+.gitignore
+
+# Ignore documentation
+README.md
+*.md
+
+# Ignore IDE files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Ignore Docker files (we copy them explicitly)
+Dockerfile
+docker-compose.yml
+.dockerignore

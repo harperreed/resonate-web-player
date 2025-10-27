@@ -1,0 +1,32 @@
+# Simple Dockerfile that uses a pre-built binary
+# Build the binary first with: go build -o resonate-player
+
+FROM debian:bookworm-slim
+
+# Install runtime dependencies for audio
+RUN apt-get update && apt-get install -y \
+    libopus0 \
+    libopusfile0 \
+    libasound2 \
+    libpulse0 \
+    pulseaudio-utils \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create app directory
+WORKDIR /app
+
+# Copy pre-built binary
+COPY resonate-player /app/resonate-player
+
+# Copy default config
+COPY config/ /app/config/
+
+# Expose web port
+EXPOSE 8080
+
+# Set environment variable for config path
+ENV CONFIG_PATH=/app/config/config.yaml
+
+# Run the application
+CMD ["/app/resonate-player"]
