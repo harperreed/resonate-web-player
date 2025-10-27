@@ -1,0 +1,250 @@
+# ABOUTME: Release workflow triggered by version tags
+# ABOUTME: Builds Linux binaries and creates GitHub releases
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    name: Test Before Release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+
+    - name: Install audio dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y pkg-config libopus-dev libopusfile-dev libasound2-dev
+
+    - name: Download dependencies
+      run: go mod download
+
+    - name: Verify dependencies
+      run: go mod verify
+
+    - name: Run tests (if any exist)
+      run: |
+        if go list ./... | grep -q .; then
+          go test -v -race ./...
+        else
+          echo "No tests found, skipping"
+        fi
+
+    - name: Run linter
+      uses: golangci/golangci-lint-action@v6
+      with:
+        version: latest
+        args: --timeout=5m
+
+  build:
+    name: Build ${{ matrix.os }} ${{ matrix.arch }}
+    needs: test
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - os: linux
+            arch: amd64
+            runner: ubuntu-latest
+          - os: linux
+            arch: arm64
+            runner: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+
+    - name: Install audio dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y pkg-config libopus-dev libopusfile-dev libasound2-dev
+
+    - name: Get version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+    - name: Build binary
+      env:
+        GOARCH: ${{ matrix.arch }}
+      run: |
+        mkdir -p dist
+
+        VERSION="${{ steps.version.outputs.VERSION }}"
+        LDFLAGS="-s -w"
+
+        # Build the resonate web player
+        export CGO_ENABLED=1
+        go build -ldflags "${LDFLAGS}" -o dist/resonate-player-${{ matrix.os }}-${{ matrix.arch }} .
+
+        # Show dependencies for verification
+        echo "Binary dependencies:"
+        ldd dist/resonate-player-${{ matrix.os }}-${{ matrix.arch }} || file dist/resonate-player-${{ matrix.os }}-${{ matrix.arch }}
+
+    - name: Create archive
+      run: |
+        cd dist
+        tar czf resonate-player-${{ matrix.os }}-${{ matrix.arch }}.tar.gz resonate-player-${{ matrix.os }}-${{ matrix.arch }}
+        ls -lh *.tar.gz
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: binaries-${{ matrix.os }}-${{ matrix.arch }}
+        path: dist/*.tar.gz
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Get version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+        pattern: binaries-*
+        merge-multiple: true
+
+    - name: List artifacts
+      run: ls -lh artifacts/
+
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        PREV_TAG=$(git describe --tags --abbrev=0 ${{ steps.version.outputs.VERSION }}^ 2>/dev/null || echo "")
+        if [ -z "$PREV_TAG" ]; then
+          echo "NOTES=Initial release" >> $GITHUB_OUTPUT
+        else
+          NOTES=$(git log --pretty=format:"- %s (%h)" ${PREV_TAG}..${{ steps.version.outputs.VERSION }})
+          echo "NOTES<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ steps.version.outputs.VERSION }}
+        name: Resonate Web Player ${{ steps.version.outputs.VERSION }}
+        body: |
+          ## Resonate Web Player ${{ steps.version.outputs.VERSION }}
+
+          A web-based Resonate audio receiver with real-time metadata display and album artwork.
+
+          ### Features
+          - 🎵 Real-time audio streaming via Resonate protocol
+          - 🎨 Album artwork and metadata display
+          - 📡 WebSocket live updates
+          - 🔌 REST API for integrations
+          - ⚙️ YAML configuration
+          - 🐳 Docker support with audio passthrough
+
+          ### Downloads
+
+          **Linux Binaries**
+
+          - **x86_64 (AMD64):** `resonate-player-linux-amd64.tar.gz`
+          - **ARM64 (aarch64):** `resonate-player-linux-arm64.tar.gz`
+
+          ### Quick Start
+
+          ```bash
+          # Download and extract
+          tar xzf resonate-player-linux-amd64.tar.gz
+
+          # Run the player
+          ./resonate-player-linux-amd64
+
+          # Open your browser to http://localhost:8080
+          ```
+
+          ### Configuration
+
+          Edit `config/config.yaml` to configure:
+          - Resonate server address
+          - Player name
+          - Volume level
+          - Web interface port
+
+          ### Dependencies
+
+          The binaries require these system libraries:
+          ```bash
+          # Debian/Ubuntu
+          sudo apt-get install libasound2 libopus0 libopusfile0
+
+          # Fedora/RHEL
+          sudo dnf install alsa-lib opus opusfile
+
+          # Arch Linux
+          sudo pacman -S alsa-lib opus opusfile
+          ```
+
+          ### Docker
+
+          Run with Docker for audio device passthrough:
+          ```bash
+          docker run -d \
+            -p 8080:8080 \
+            -v /dev/snd:/dev/snd \
+            --group-add audio \
+            ghcr.io/harperreed/resonate-player:${{ steps.version.outputs.VERSION }}
+          ```
+
+          ### API Endpoints
+
+          - `GET /` - Web interface
+          - `GET /ws` - WebSocket for live metadata
+          - `GET /metadata` - JSON API with player status
+
+          ### Building from Source
+
+          ```bash
+          # Install dependencies
+          brew install opus opusfile  # macOS
+          # or: sudo apt-get install libopus-dev libopusfile-dev libasound2-dev  # Linux
+
+          # Build
+          go build -o resonate-player .
+          ```
+
+          ### Changes
+
+          ${{ steps.release_notes.outputs.NOTES }}
+
+          ---
+
+          For more information, see the [README](https://github.com/harperreed/resonate-player-go/blob/main/README.md)
+        files: |
+          artifacts/*.tar.gz
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,84 @@
+# ABOUTME: CI workflow for pull requests and main branch pushes
+# ABOUTME: Runs tests, linting, and builds the resonate web player
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+
+    - name: Install audio dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y pkg-config libopus-dev libopusfile-dev libasound2-dev
+
+    - name: Cache Go modules
+      uses: actions/cache@v4
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Download dependencies
+      run: go mod download
+
+    - name: Verify dependencies
+      run: go mod verify
+
+    - name: Build binary
+      run: |
+        go build -v -ldflags="-s -w" -o resonate-player .
+
+    - name: Test build works
+      run: |
+        ./resonate-player --help || echo "Binary built successfully (no --help flag)"
+        ldd resonate-player
+
+    - name: Run tests (if any exist)
+      run: |
+        if go list ./... | grep -q .; then
+          go test -v -race ./...
+        else
+          echo "No tests found, skipping"
+        fi
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+
+    - name: Install audio dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y pkg-config libopus-dev libopusfile-dev libasound2-dev
+
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v6
+      with:
+        version: latest
+        args: --timeout=5m
+        skip-cache: false
