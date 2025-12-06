@@ -1,5 +1,5 @@
 # Simple Dockerfile that uses a pre-built binary
-# Build the binary first with: go build -o resonate-player
+# Build the binary first with: go build -o sendspin-player
 
 FROM debian:bookworm-slim
 
@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy pre-built binary
-COPY resonate-player /app/resonate-player
+COPY sendspin-player /app/sendspin-player
 
 # Copy default config
 COPY config/ /app/config/
@@ -29,4 +29,4 @@ EXPOSE 8080
 ENV CONFIG_PATH=/app/config/config.yaml
 
 # Run the application
-CMD ["/app/resonate-player"]
+CMD ["/app/sendspin-player"]

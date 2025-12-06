@@ -1,11 +1,11 @@
-# Resonate Player Go
+# Sendspin Player Go
 
-A simple Go web application that receives Resonate audio streams and displays real-time metadata on a web interface.
+A simple Go web application that receives Sendspin audio streams and displays real-time metadata on a web interface.
 <img width="748" height="715" alt="Screenshot 2025-10-26 at 10 39 05 PM" src="https://github.com/user-attachments/assets/b5a08bf4-46c4-4071-9aab-b78ab957163e" />
 
 ## Features
 
-- Connects to a Resonate server as a receiver/player
+- Connects to a Sendspin server as a receiver/player
 - Displays now-playing metadata (artist, title, album, cover art) on a clean web interface
 - Real-time updates via WebSocket
 - Beautiful gradient UI with smooth animations and album artwork display
@@ -36,10 +36,10 @@ sudo dnf install pkg-config opus-devel opusfile-devel ffmpeg
 The application uses a YAML configuration file located at `config/config.yaml`:
 
 ```yaml
-# Resonate server settings
+# Sendspin server settings
 server:
-  address: "localhost:8927"        # Address of the Resonate server
-  player_name: "Resonate Web Player"  # Name displayed in server
+  address: "localhost:8927"        # Address of the Sendspin server
+  player_name: "Sendspin Web Player"  # Name displayed in server
 
 # Audio settings
 audio:
@@ -53,7 +53,7 @@ web:
 
 You can override the config path using the `CONFIG_PATH` environment variable:
 ```bash
-CONFIG_PATH=/path/to/config.yaml ./resonate-player
+CONFIG_PATH=/path/to/config.yaml ./sendspin-player
 ```
 
 ## Building
@@ -65,7 +65,7 @@ CONFIG_PATH=/path/to/config.yaml ./resonate-player
 make build
 
 # Or directly with go
-go build -o resonate-player
+go build -o sendspin-player
 ```
 
 ### Linux Build (For Docker)
@@ -86,7 +86,7 @@ This command:
 
 ### Running Locally
 
-1. Ensure you have a Resonate server running (or update `config/config.yaml` with the server address)
+1. Ensure you have a Sendspin server running (or update `config/config.yaml` with the server address)
 
 2. Build and run:
 ```bash
@@ -95,7 +95,7 @@ make run
 
 Or manually:
 ```bash
-./resonate-player
+./sendspin-player
 ```
 
 3. Open your browser to:
@@ -154,20 +154,20 @@ make build-docker
 Or manually:
 ```bash
 make build-linux
-docker build -f Dockerfile.simple -t resonate-player:latest .
+docker build -f Dockerfile.simple -t sendspin-player:latest .
 ```
 
 2. Run the container:
 ```bash
 docker run -d \
-  --name resonate-player \
+  --name sendspin-player \
   -p 8080:8080 \
   -v $(pwd)/config:/app/config:ro \
   --network host \
-  resonate-player:latest
+  sendspin-player:latest
 ```
 
-**Note**: The `--network host` option is used to allow easy access to the Resonate server running on the host. On macOS/Windows, you may need to adjust the server address in `config/config.yaml` to use `host.docker.internal` instead of `localhost`.
+**Note**: The `--network host` option is used to allow easy access to the Sendspin server running on the host. On macOS/Windows, you may need to adjust the server address in `config/config.yaml` to use `host.docker.internal` instead of `localhost`.
 
 #### Audio Device Configuration
 
@@ -203,10 +203,10 @@ Both options are enabled in the default `docker-compose.yml`. If you have issues
 After starting the container, check if audio devices are accessible:
 ```bash
 # Check ALSA devices
-docker exec resonate-player ls -l /dev/snd
+docker exec sendspin-player ls -l /dev/snd
 
 # Check PulseAudio connection (if using PulseAudio)
-docker exec resonate-player pactl info
+docker exec sendspin-player pactl info
 ```
 
 **Platform Notes**:
@@ -223,7 +223,7 @@ You can mount a custom config file:
 docker run -d \
   -p 8080:8080 \
   -v /path/to/your/config.yaml:/app/config/config.yaml:ro \
-  resonate-player:latest
+  sendspin-player:latest
 ```
 
 ### Make Targets
@@ -252,7 +252,7 @@ Returns current player status and metadata as JSON.
 ```json
 {
   "player": {
-    "name": "Resonate Web Player",
+    "name": "Sendspin Web Player",
     "server": "localhost:8927",
     "volume": 80,
     "connected_clients": 2
@@ -285,7 +285,7 @@ This endpoint is useful for:
 
 The application consists of:
 
-- **Resonate Receiver**: Connects to the Resonate server and receives audio stream + metadata
+- **Sendspin Receiver**: Connects to the Sendspin server and receives audio stream + metadata
 - **HTTP Server**: Serves the web interface
 - **WebSocket Server**: Broadcasts metadata updates to all connected web clients
 - **Web UI**: Single-page application with auto-reconnecting WebSocket client
@@ -296,7 +296,7 @@ The application consists of:
 
 ```
 .
-├── main.go              # Main application with HTTP/WebSocket server and Resonate receiver
+├── main.go              # Main application with HTTP/WebSocket server and Sendspin receiver
 ├── go.mod               # Go module definition
 ├── go.sum               # Go module checksums
 ├── config/
@@ -310,7 +310,7 @@ The application consists of:
 
 ### Key Components
 
-- `startResonateReceiver()`: Initializes and starts the Resonate player
+- `startSendspinReceiver()`: Initializes and starts the Sendspin player
 - `handleMetadata()`: Called when new metadata is received from the stream
 - `broadcastMetadata()`: Sends metadata updates (including cover art) to all connected WebSocket clients
 - `handleWebSocket()`: Manages WebSocket connections
@@ -323,4 +323,4 @@ This project uses the [resonate-go](https://github.com/harperreed/resonate-go) l
 
 ## Note
 
-This is a proof of concept implementation. The Resonate protocol is still evolving and may change.
+This is a proof of concept implementation. The Sendspin protocol is still evolving and may change.

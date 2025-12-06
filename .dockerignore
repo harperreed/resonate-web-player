@@ -1,4 +1,4 @@
-# Ignore build artifacts (except resonate-player binary for simple Dockerfile)
+# Ignore build artifacts (except sendspin-player binary for simple Dockerfile)
 # resonate-player
 *.exe
 *.dll

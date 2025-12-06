@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  resonate-player:
+  sendspin-player:
     build:
       context: .
       dockerfile: Dockerfile.simple
-    container_name: resonate-player
+    container_name: sendspin-player
     ports:
       - "8080:8080"
     volumes:
@@ -46,11 +46,11 @@ services:
     restart: unless-stopped
 
   # Alternative: ALSA-only configuration (uncomment to use)
-  # resonate-player-alsa:
+  # sendspin-player-alsa:
   #   build:
   #     context: .
   #     dockerfile: Dockerfile.simple
-  #   container_name: resonate-player-alsa
+  #   container_name: sendspin-player-alsa
   #   ports:
   #     - "8080:8080"
   #   volumes:

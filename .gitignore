@@ -1,6 +1,6 @@
 # Binaries
-resonate-player
-resonate-player-linux
+sendspin-player
+sendspin-player-linux
 *.exe
 *.dll
 *.so

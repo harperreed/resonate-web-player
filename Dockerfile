@@ -24,7 +24,7 @@ RUN go mod download
 COPY *.go ./
 
 # Build the application (dynamic linking for smaller memory usage during build)
-RUN CGO_ENABLED=1 GOOS=linux go build -o resonate-player .
+RUN CGO_ENABLED=1 GOOS=linux go build -o sendspin-player .
 
 # Stage 2: Runtime stage
 FROM debian:bookworm-slim
@@ -40,7 +40,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy binary from builder
-COPY --from=builder /build/resonate-player /app/resonate-player
+COPY --from=builder /build/sendspin-player /app/sendspin-player
 
 # Copy default config
 COPY config/ /app/config/
@@ -52,4 +52,4 @@ EXPOSE 8080
 ENV CONFIG_PATH=/app/config/config.yaml
 
 # Run the application
-CMD ["/app/resonate-player"]
+CMD ["/app/sendspin-player"]

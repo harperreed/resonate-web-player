@@ -91,18 +91,18 @@ jobs:
         VERSION="${{ steps.version.outputs.VERSION }}"
         LDFLAGS="-s -w"
 
-        # Build the resonate web player
+        # Build the sendspin web player
         export CGO_ENABLED=1
-        go build -ldflags "${LDFLAGS}" -o dist/resonate-player-${{ matrix.os }}-${{ matrix.arch }} .
+        go build -ldflags "${LDFLAGS}" -o dist/sendspin-player-${{ matrix.os }}-${{ matrix.arch }} .
 
         # Show dependencies for verification
         echo "Binary dependencies:"
-        ldd dist/resonate-player-${{ matrix.os }}-${{ matrix.arch }} || file dist/resonate-player-${{ matrix.os }}-${{ matrix.arch }}
+        ldd dist/sendspin-player-${{ matrix.os }}-${{ matrix.arch }} || file dist/sendspin-player-${{ matrix.os }}-${{ matrix.arch }}
 
     - name: Create archive
       run: |
         cd dist
-        tar czf resonate-player-${{ matrix.os }}-${{ matrix.arch }}.tar.gz resonate-player-${{ matrix.os }}-${{ matrix.arch }}
+        tar czf sendspin-player-${{ matrix.os }}-${{ matrix.arch }}.tar.gz sendspin-player-${{ matrix.os }}-${{ matrix.arch }}
         ls -lh *.tar.gz
 
     - name: Upload artifacts
@@ -152,14 +152,14 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ steps.version.outputs.VERSION }}
-        name: Resonate Web Player ${{ steps.version.outputs.VERSION }}
+        name: Sendspin Web Player ${{ steps.version.outputs.VERSION }}
         body: |
-          ## Resonate Web Player ${{ steps.version.outputs.VERSION }}
+          ## Sendspin Web Player ${{ steps.version.outputs.VERSION }}
 
-          A web-based Resonate audio receiver with real-time metadata display and album artwork.
+          A web-based Sendspin audio receiver with real-time metadata display and album artwork.
 
           ### Features
-          - 🎵 Real-time audio streaming via Resonate protocol
+          - 🎵 Real-time audio streaming via Sendspin protocol
           - 🎨 Album artwork and metadata display
           - 📡 WebSocket live updates
           - 🔌 REST API for integrations
@@ -170,17 +170,17 @@ jobs:
 
           **Linux Binaries**
 
-          - **x86_64 (AMD64):** `resonate-player-linux-amd64.tar.gz`
-          - **ARM64 (aarch64):** `resonate-player-linux-arm64.tar.gz`
+          - **x86_64 (AMD64):** `sendspin-player-linux-amd64.tar.gz`
+          - **ARM64 (aarch64):** `sendspin-player-linux-arm64.tar.gz`
 
           ### Quick Start
 
           ```bash
           # Download and extract
-          tar xzf resonate-player-linux-amd64.tar.gz
+          tar xzf sendspin-player-linux-amd64.tar.gz
 
           # Run the player
-          ./resonate-player-linux-amd64
+          ./sendspin-player-linux-amd64
 
           # Open your browser to http://localhost:8080
           ```
@@ -188,7 +188,7 @@ jobs:
           ### Configuration
 
           Edit `config/config.yaml` to configure:
-          - Resonate server address
+          - Sendspin server address
           - Player name
           - Volume level
           - Web interface port
@@ -215,7 +215,7 @@ jobs:
             -p 8080:8080 \
             -v /dev/snd:/dev/snd \
             --group-add audio \
-            ghcr.io/harperreed/resonate-player:${{ steps.version.outputs.VERSION }}
+            ghcr.io/harperreed/sendspin-player:${{ steps.version.outputs.VERSION }}
           ```
 
           ### API Endpoints
@@ -232,7 +232,7 @@ jobs:
           # or: sudo apt-get install libopus-dev libopusfile-dev libasound2-dev  # Linux
 
           # Build
-          go build -o resonate-player .
+          go build -o sendspin-player .
           ```
 
           ### Changes
@@ -241,7 +241,7 @@ jobs:
 
           ---
 
-          For more information, see the [README](https://github.com/harperreed/resonate-player-go/blob/main/README.md)
+          For more information, see the [README](https://github.com/harperreed/sendspin-player-go/blob/main/README.md)
         files: |
           artifacts/*.tar.gz
         draft: false

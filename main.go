@@ -1,4 +1,4 @@
-// ABOUTME: Simple Go web app that receives Resonate audio streams and displays metadata
+// ABOUTME: Simple Go web app that receives Sendspin audio streams and displays metadata
 // ABOUTME: Provides a web interface with real-time metadata updates via WebSocket
 
 package main
@@ -86,8 +86,8 @@ func main() {
 	}
 
 	log.Printf("Loaded configuration from %s", configPath)
-	// Start the Resonate receiver in a goroutine
-	go startResonateReceiver()
+	// Start the Sendspin receiver in a goroutine
+	go startSendspinReceiver()
 
 	// HTTP handlers
 	http.HandleFunc("/", handleIndex)
@@ -101,9 +101,9 @@ func main() {
 	}
 }
 
-// startResonateReceiver initializes and starts the Resonate player
-func startResonateReceiver() {
-	log.Printf("Connecting to Resonate server at %s as '%s'", config.Server.Address, config.Server.PlayerName)
+// startSendspinReceiver initializes and starts the Sendspin player
+func startSendspinReceiver() {
+	log.Printf("Connecting to Sendspin server at %s as '%s'", config.Server.Address, config.Server.PlayerName)
 	player, err := resonate.NewPlayer(resonate.PlayerConfig{
 		ServerAddr: config.Server.Address,
 		PlayerName: config.Server.PlayerName,
@@ -115,7 +115,7 @@ func startResonateReceiver() {
 		return
 	}
 
-	log.Println("Connecting to Resonate server...")
+	log.Println("Connecting to Sendspin server...")
 	if err := player.Connect(); err != nil {
 		log.Printf("Error connecting to server: %v", err)
 		return
@@ -127,11 +127,11 @@ func startResonateReceiver() {
 		return
 	}
 
-	log.Println("Resonate receiver started successfully")
+	log.Println("Sendspin receiver started successfully")
 	select {} // Keep running
 }
 
-// handleMetadata is called when new metadata is received from the Resonate stream
+// handleMetadata is called when new metadata is received from the Sendspin stream
 func handleMetadata(meta resonate.Metadata) {
 	metadataMutex.Lock()
 	currentMetadata = meta
@@ -263,7 +263,7 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resonate Web Player</title>
+    <title>Sendspin Web Player</title>
     <style>
         * {
             margin: 0;
@@ -389,7 +389,7 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 </head>
 <body>
     <div class="player-container">
-        <h1>🎵 Resonate Player</h1>
+        <h1>🎵 Sendspin Player</h1>
 
         <div class="metadata-display" id="metadata">
             <div class="artwork-container" id="artwork">

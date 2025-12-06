@@ -1,11 +1,11 @@
-# Resonate Player Configuration
+# Sendspin Player Configuration
 
-# Resonate server settings
+# Sendspin server settings
 server:
-  # Address of the Resonate server to connect to
+  # Address of the Sendspin server to connect to
   address: "192.168.200.8:8927"
   # Name of this player (displayed in server)
-  player_name: "Resonate Web Player"
+  player_name: "Sendspin Web Player"
 
 # Audio settings
 audio:

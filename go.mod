@@ -1,4 +1,4 @@
-module github.com/harperreed/resonate-player-go
+module github.com/harperreed/sendspin-player-go
 
 go 1.24.1
 

@@ -1,5 +1,5 @@
 # ABOUTME: CI workflow for pull requests and main branch pushes
-# ABOUTME: Runs tests, linting, and builds the resonate web player
+# ABOUTME: Runs tests, linting, and builds the sendspin web player
 name: CI
 
 on:
@@ -43,12 +43,12 @@ jobs:
 
     - name: Build binary
       run: |
-        go build -v -ldflags="-s -w" -o resonate-player .
+        go build -v -ldflags="-s -w" -o sendspin-player .
 
     - name: Test build works
       run: |
-        ./resonate-player --help || echo "Binary built successfully (no --help flag)"
-        ldd resonate-player
+        ./sendspin-player --help || echo "Binary built successfully (no --help flag)"
+        ldd sendspin-player
 
     - name: Run tests (if any exist)
       run: |
